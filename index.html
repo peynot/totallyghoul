@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halloween Surf Contest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fff; --ink:#000; --pumpkin:#ff6b00; --grape:#4a1d96; --ok:#00704a; --bad:#c8102e; --line:#000; --soft:#f1ecf9;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:500 18px/1.35 Archivo,system-ui,sans-serif}
+h1,h2,h3{font-family:'Archivo Black',Impact,sans-serif;font-weight:400;margin:0}
+header{background:var(--ink);color:var(--pumpkin);padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:22px;flex:1}
+#status{font-size:14px;color:#fff}
+#status b{color:var(--pumpkin)}
+main{max-width:720px;margin:0 auto;padding:12px}
+.view{display:none}.view.on{display:block}
+.card{border:3px solid var(--line);border-radius:6px;padding:12px;margin:0 0 14px;background:var(--paper)}
+.card.live{border-color:var(--pumpkin);box-shadow:0 0 0 4px var(--pumpkin)}
+.card h2{font-size:22px;margin-bottom:6px}
+.sub{font-size:15px;color:#333;margin:0 0 8px}
+.muted{color:#444}
+button,select,input[type=text],input[type=number]{font:inherit;font-weight:700;border:3px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-height:52px;padding:8px 12px}
+button{background:var(--pumpkin);cursor:pointer}
+button.alt{background:var(--paper)}
+button.danger{background:var(--bad);color:#fff}
+button:disabled{opacity:.4}
+button.big{width:100%;min-height:64px;font-size:20px}
+button.sm{min-height:40px;padding:4px 10px;font-size:15px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1;background:var(--paper)}
+.tabs button.on{background:var(--pumpkin)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sc{border:3px solid var(--line);border-radius:6px;overflow:hidden;background:var(--paper)}
+.sc .ph{aspect-ratio:1/1;width:100%;object-fit:cover;display:block;background:var(--soft)}
+.sc .t{padding:6px 8px}
+.sc .t b{display:block;font-size:17px;line-height:1.15}
+.sc .t span{font-size:14px;color:#333}
+.nophoto{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:44px;background:var(--soft)}
+.thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;border:2px solid var(--line);flex:none;background:var(--soft)}
+.thumbph{width:48px;height:48px;border-radius:6px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;background:var(--soft);flex:none}
+.timer{font:400 56px/1 'Archivo Black',Impact,sans-serif;margin:4px 0 10px}
+.timer.over{color:var(--bad)}
+.judgecard{border:3px solid var(--line);border-radius:6px;margin:0 0 12px;overflow:hidden}
+.judgecard img,.judgecard .nophoto{aspect-ratio:4/3;width:100%;object-fit:cover;display:block}
+.judgecard .lab{font:400 26px/1.1 'Archivo Black',Impact,sans-serif;padding:8px 10px 0}
+.judgecard .nm{padding:0 10px 8px;font-size:15px;color:#333}
+.stepper{display:flex;align-items:stretch;border-top:3px solid var(--line)}
+.stepper button{width:84px;min-height:76px;font-size:38px;border:0;border-radius:0;line-height:1}
+.stepper .val{flex:1;display:flex;align-items:center;justify-content:center;font:400 48px 'Archivo Black',Impact,sans-serif;border-left:3px solid var(--line);border-right:3px solid var(--line)}
+.stepper .val.empty{color:#888}
+.pick{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.pick button{flex:1;min-height:60px;font-size:24px;background:var(--paper)}
+.pick button.on{background:var(--grape);color:#fff}
+.badge{display:inline-block;border:2px solid var(--line);border-radius:20px;padding:0 10px;font-size:14px;font-weight:700;background:var(--paper)}
+.badge.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.badge.warn{background:var(--pumpkin)}
+.badge.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+.item{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:2px solid #ddd}
+.item:first-child{border-top:0}
+.item .grow b{display:block;line-height:1.15}
+.item .grow span{font-size:14px;color:#333}
+.podium .item{border-top:0}
+.rank{font:400 24px 'Archivo Black',sans-serif;width:34px;text-align:center}
+.note{background:var(--soft);border:2px solid var(--grape);border-radius:6px;padding:8px 10px;margin:8px 0;font-size:15px}
+.err{background:#ffe3e6;border-color:var(--bad)}
+label.chk{display:flex;align-items:center;gap:10px;min-height:52px;font-weight:700}
+label.chk input{width:30px;height:30px}
+.form .row{margin-bottom:10px}
+.form input[type=text],.form input[type=number],.form select{width:100%}
+a{color:var(--grape);font-weight:700}
+footer{text-align:center;padding:10px 0 30px;font-size:15px}
+@media (prefers-reduced-motion:no-preference){.timer.over{animation:blink 1s steps(2) infinite}}
+@keyframes blink{50%{opacity:.35}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Halloween Surf Contest</h1>
+  <div id="status"></div>
+</header>
+<main>
+  <div id="demo" class="note" style="display:none">Demo mode: no backend connected. Data stays on this device.</div>
+
+  <section id="v-board" class="view"><div id="board"></div>
+    <footer><a href="#judge">Judge</a> &nbsp; <a href="#admin">Admin</a></footer>
+  </section>
+
+  <section id="v-judge" class="view"><div id="judge"></div>
+    <footer><a href="#board">Public board</a></footer>
+  </section>
+
+  <section id="v-admin" class="view">
+    <div class="tabs">
+      <button id="t-checkin" data-act="tab" data-tab="checkin">Check-in</button>
+      <button id="t-run" data-act="tab" data-tab="run">Run heats</button>
+    </div>
+
+    <div id="p-checkin">
+      <div class="card form">
+        <h2 id="f-title">Add surfer</h2>
+        <input type="hidden" id="f-id">
+        <div class="row"><input type="text" id="f-costume" placeholder="Costume (what judges will see)" autocomplete="off"></div>
+        <div class="row"><input type="text" id="f-name" placeholder="Name (or group name)" autocomplete="off"></div>
+        <div class="row">
+          <input type="number" id="f-age" placeholder="Age" inputmode="numeric" class="grow">
+          <select id="f-div" class="grow"></select>
+        </div>
+        <div class="row">
+          <input type="file" id="f-photo" accept="image/*" class="grow">
+          <img id="f-prev" class="thumb" alt="" style="display:none">
+        </div>
+        <label class="chk"><input type="checkbox" id="f-paid"> Paid</label>
+        <label class="chk" id="f-ccwrap"><input type="checkbox" id="f-cc"> Also in beach costume contest</label>
+        <div class="row">
+          <button class="grow big" id="f-save" data-act="save">Add surfer</button>
+        </div>
+        <div class="row">
+          <button class="alt sm" id="f-cancel" data-act="cancel" style="display:none">Cancel edit</button>
+          <button class="danger sm" id="f-del" data-act="delsurfer" style="display:none">Delete entry</button>
+        </div>
+      </div>
+      <div id="roster" class="dyn"></div>
+    </div>
+
+    <div id="p-run" style="display:none"><div id="run" class="dyn"></div></div>
+    <footer><a href="#board">Public board</a></footer>
+  </section>
+</main>
+
+<script>
+// ---------- Config ----------
+// Paste your Apps Script web app URL here. Leave empty to try the app in demo mode.
+const API_URL = 'https://script.google.com/macros/s/AKfycbzbSQfYNHt3TiolmWvFDI3DR0rNGDy1o76o057pnSJxHOT_6V0xOgsTEvTRLeFUfjau/exec';
+
+const HEAT_MS = 15 * 60 * 1000;
+const COSTUME = 'Costume only';
+const DIVS = [
+  { name: 'Tiny Terrors', fee: 20 },
+  { name: 'Grom Reapers', fee: 30 },
+  { name: 'Monster Mash', fee: 40 }
+];
+const suggestDiv = a => a <= 12 ? DIVS[0].name : a <= 17 ? DIVS[1].name : DIVS[2].name;
+const feeForAge = a => (a === '' || a == null) ? 0 : a <= 12 ? 20 : a <= 17 ? 30 : 40;
+const feeOf = s => s.division === COSTUME ? 0 : feeForAge(s.age);
+
+// ---------- Helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls = (k, d) => { try { const v = localStorage.getItem('sc_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem('sc_' + k, JSON.stringify(v)); } catch (e) {} };
+const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const bool = v => v === true || v === 'TRUE' || v === 'true';
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const money = n => '$' + n;
+
+// ---------- State ----------
+let S = { surfers: [], heats: [], scores: [], config: {} };
+let lastJSON = '', dirty = false, queue = ls('queue', []), online = true;
+const localPhotos = {};
+
+function norm(raw) {
+  return {
+    surfers: (raw.surfers || []).map(s => ({
+      id: String(s.id), name: String(s.name || ''), age: s.age === '' ? '' : Number(s.age),
+      division: String(s.division || ''), costume: String(s.costume || ''), photo: String(s.photo || ''),
+      paid: bool(s.paid), costumeContest: bool(s.costumeContest)
+    })),
+    heats: (raw.heats || []).map(h => ({
+      id: String(h.id), division: String(h.division), round: Number(h.round), num: Number(h.num),
+      final: bool(h.final), surfers: String(h.surfers || '').split(',').filter(Boolean),
+      status: String(h.status || 'upcoming'), startedAt: Number(h.startedAt) || 0,
+      override: String(h.override || '').split(',').filter(Boolean)
+    })),
+    scores: (raw.scores || []).map(x => ({
+      id: String(x.id), heatId: String(x.heatId), judge: Number(x.judge), surferId: String(x.surferId), value: Number(x.value)
+    })),
+    config: raw.config || {}
+  };
+}
+
+function setState(raw) {
+  const j = JSON.stringify(raw);
+  if (j === lastJSON) return;
+  lastJSON = j;
+  S = norm(raw);
+  if (editing()) dirty = true; else render();
+}
+function editing() {
+  const a = document.activeElement;
+  return !!(a && /INPUT|SELECT|TEXTAREA/.test(a.tagName) && a.closest('.dyn'));
+}
+document.addEventListener('focusout', () => setTimeout(() => { if (dirty && !editing()) { dirty = false; render(); } }, 250));
+
+// ---------- Backend (Apps Script, or localStorage demo) ----------
+function demoRead() { return ls('demo', { surfers: [], heats: [], scores: [], config: {} }); }
+function demoApply(ops) {
+  const db = demoRead();
+  const tabs = { Surfers: 'surfers', Heats: 'heats', Scores: 'scores' };
+  ops.forEach(op => {
+    if (op.t === 'upsert') {
+      if (op.tab === 'Config') { db.config[op.row.id] = op.row.value; return; }
+      const list = db[tabs[op.tab]];
+      const i = list.findIndex(r => String(r.id) === String(op.row.id));
+      if (i >= 0) Object.assign(list[i], op.row); else list.push(Object.assign({}, op.row));
+    } else if (op.t === 'delete') {
+      db[tabs[op.tab]] = db[tabs[op.tab]].filter(r => String(r.id) !== String(op.id));
+    } else if (op.t === 'photo') {
+      const s = db.surfers.find(r => r.id === op.id); if (s) s.photo = op.data;
+    }
+  });
+  lsSet('demo', db);
+  return db;
+}
+
+async function call(ops) {
+  let res;
+  if (!API_URL) res = demoApply(ops);
+  else {
+    const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ pin: ls('pin', ''), ops }) });
+    res = await r.json();
+  }
+  if (res.error) throw new Error(res.error);
+  setState(res);
+  setOnline(true);
+  return res;
+}
+async function poll() {
+  try {
+    const r = API_URL ? await (await fetch(API_URL)).json() : demoRead();
+    if (r.error) throw new Error(r.error);
+    setState(r); setOnline(true);
+  } catch (e) { setOnline(false); }
+}
+function setOnline(v) { online = v; renderStatus(); }
+
+async function act(fn) {
+  try {
+    await fn();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    dirty = false; render();
+  } catch (e) {
+    if (/PIN/.test(e.message)) { localStorage.removeItem('sc_pin'); alert('Wrong PIN. Reload and try again.'); }
+    else alert('Not saved. Check your signal and try again.\n(' + e.message + ')');
+  }
+}
+
+// Judge scores go through an offline queue so a dead zone doesn't lose them.
+let flushing = false;
+function enqueue(ops) { queue.push(ops); lsSet('queue', queue); flush(); renderStatus(); }
+async function flush() {
+  if (flushing || !queue.length) return;
+  flushing = true;
+  try {
+    while (queue.length) { await call(queue[0]); queue.shift(); lsSet('queue', queue); }
+  } catch (e) { setOnline(false); }
+  flushing = false;
+  renderStatus(); if (view() === 'judge') renderJudge();
+}
+const pendingFor = hid => queue.some(b => b.some(o => o.row && o.row.heatId === hid));
+
+// ---------- Domain helpers ----------
+const sById = id => S.surfers.find(s => s.id === id);
+const heatsOf = d => S.heats.filter(h => h.division === d);
+const byOrder = (a, b) => a.round - b.round || divIdx(a.division) - divIdx(b.division) || a.num - b.num;
+const divIdx = d => { const i = DIVS.findIndex(x => x.name === d); return i < 0 ? 99 : i; };
+const divList = () => {
+  const extra = [...new Set(S.surfers.map(s => s.division))].filter(d => d && d !== COSTUME && divIdx(d) === 99);
+  return DIVS.map(d => d.name).concat(extra);
+};
+const liveHeat = () => S.heats.filter(h => h.status === 'live').sort((a, b) => b.startedAt - a.startedAt)[0];
+const judgesN = () => Number(S.config.judges) || 3;
+function label(h) {
+  const sib = S.heats.filter(x => x.division === h.division && x.round === h.round);
+  return { title: h.division, sub: (h.final ? 'Final' : 'Round ' + h.round) + (sib.length > 1 ? ', Heat ' + h.num : '') };
+}
+const fullLabel = h => { const l = label(h); return l.title + ', ' + l.sub; };
+const adv = h => h.surfers.length <= 1 ? h.surfers.length : Math.min(2, h.surfers.length - 1);
+const mean = a => a && a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length * 100) / 100 : null;
+function scoreMap(hid) {
+  const m = {};
+  S.scores.filter(x => x.heatId === hid).forEach(x => { (m[x.surferId] = m[x.surferId] || []).push(x.value); });
+  return m;
+}
+function ranking(h) {
+  const m = scoreMap(h.id);
+  let rows = h.surfers.map(id => ({ id, avg: mean(m[id]) }));
+  const ov = h.override;
+  let overridden = false;
+  if (ov.length && ov.length === h.surfers.length && ov.every(i => h.surfers.includes(i))) {
+    rows = ov.map(id => rows.find(r => r.id === id)); overridden = true;
+  } else rows.sort((a, b) => (b.avg == null ? -1 : b.avg) - (a.avg == null ? -1 : a.avg));
+  const top = h.final ? 4 : adv(h) + 1;
+  rows.ties = !overridden && rows.some((r, i) => i > 0 && i < top && r.avg != null && r.avg === rows[i - 1].avg);
+  return rows;
+}
+const judgeDone = (h, j) => h.surfers.length > 0 && h.surfers.every(id => S.scores.some(x => x.heatId === h.id && x.judge === j && x.surferId === id));
+
+// ---------- UI atoms ----------
+function photoSrc(s) {
+  if (s.photo) return s.photo.startsWith('data:') ? s.photo : 'https://drive.google.com/thumbnail?id=' + s.photo + '&sz=w600';
+  return localPhotos[s.id] || '';
+}
+const costumeOf = s => s ? (s.costume || s.name || '(no label)') : '(removed)';
+function thumb(s) {
+  const src = s && photoSrc(s);
+  return src ? `<img class="thumb" src="${esc(src)}" alt="">` : '<div class="thumbph">🎃</div>';
+}
+function surferCard(s) {
+  if (!s) return '';
+  const src = photoSrc(s);
+  return `<div class="sc">${src ? `<img class="ph" src="${esc(src)}" alt="">` : '<div class="nophoto">🎃</div>'}
+    <div class="t"><b>${esc(costumeOf(s))}</b><span>${esc(s.name)}</span></div></div>`;
+}
+function renderStatus() {
+  const n = queue.reduce((a, b) => a + b.length, 0);
+  $('#status').innerHTML = (online ? 'Connected' : '<b>Offline</b>') + (n ? ` - <b>${n} pending</b>` : '');
+}
+function tickTimers() {
+  document.querySelectorAll('[data-timer]').forEach(el => {
+    const rem = HEAT_MS - (Date.now() - Number(el.dataset.timer));
+    if (rem <= 0) { el.textContent = "Time's up"; el.classList.add('over'); }
+    else { const t = Math.ceil(rem / 1000); el.textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); el.classList.remove('over'); }
+  });
+}
+
+// ---------- Views ----------
+const view = () => (location.hash.slice(1) || 'board');
+let adminTab = ls('adminTab', 'checkin');
+
+function render() {
+  const v = view();
+  ['board', 'judge', 'admin'].forEach(n => $('#v-' + n).classList.toggle('on', n === v));
+  if (v === 'board') renderBoard();
+  else if (v === 'judge') renderJudge();
+  else if (v === 'admin') {
+    $('#p-checkin').style.display = adminTab === 'checkin' ? '' : 'none';
+    $('#p-run').style.display = adminTab === 'run' ? '' : 'none';
+    $('#t-checkin').classList.toggle('on', adminTab === 'checkin');
+    $('#t-run').classList.toggle('on', adminTab === 'run');
+    refreshDivSelect();
+    renderRoster(); renderRun();
+  }
+  renderStatus(); tickTimers();
+}
+
+// Public board
+function renderBoard() {
+  let h = '';
+  const live = liveHeat();
+  if (live) {
+    const l = label(live);
+    h += `<div class="card live"><h2>${esc(l.title)}</h2><p class="sub">${esc(l.sub)}, in the water now</p>
+      <div class="timer" data-timer="${live.startedAt}"></div>
+      <div class="grid">${live.surfers.map(id => surferCard(sById(id))).join('')}</div></div>`;
+  } else h += '<div class="card"><h2>No heat in the water</h2><p class="sub">Next heat starts soon.</p></div>';
+
+  const up = S.heats.filter(x => x.status === 'upcoming').sort(byOrder).slice(0, 3);
+  if (up.length) {
+    h += '<div class="card"><h2>Up next</h2>';
+    up.forEach(x => {
+      const l = label(x);
+      h += `<p class="sub" style="margin-top:10px"><b>${esc(l.title)}, ${esc(l.sub)}</b></p>
+        ${x.surfers.map(id => { const s = sById(id); return `<div class="item">${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${esc(s ? s.name : '')}</span></div></div>`; }).join('')}`;
+    });
+    h += '</div>';
+  }
+
+  divList().forEach(d => {
+    const hs = heatsOf(d).sort(byOrder);
+    const closed = hs.filter(x => x.status === 'closed');
+    if (!closed.length) return;
+    const fin = closed.find(x => x.final);
+    h += `<div class="card"><h2>${esc(d)}</h2>`;
+    if (fin) h += podium(fin);
+    else closed.forEach(x => {
+      const r = ranking(x).slice(0, adv(x));
+      h += `<p class="sub"><b>${esc(label(x).sub)} advancing:</b> ${r.map(y => esc(costumeOf(sById(y.id)))).join(', ')}</p>`;
+    });
+    h += '</div>';
+  });
+
+  const cats = costumeCats().filter(c => S.config[c[0]]);
+  if (cats.length) {
+    h += '<div class="card"><h2>Costume contest winners</h2>';
+    cats.forEach(c => { const s = sById(String(S.config[c[0]])); h += `<div class="item">${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${esc(c[1])}${s && s.name ? ', ' + esc(s.name) : ''}</span></div></div>`; });
+    h += '</div>';
+  }
+  $('#board').innerHTML = h;
+}
+const medals = ['🥇', '🥈', '🥉'];
+function podium(fin) {
+  const r = ranking(fin).slice(0, 3);
+  return '<div class="podium">' + r.map((x, i) => { const s = sById(x.id); return `<div class="item"><div class="rank">${medals[i]}</div>${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${esc(s ? s.name : '')}${x.avg != null ? ', ' + x.avg : ''}</span></div></div>`; }).join('') + '</div>' +
+    (ranking(fin).ties ? '<div class="note">Tie. Admin is deciding.</div>' : '');
+}
+const costumeCats = () => [['bestOverall', 'Best overall costume'], ['mostCreative', 'Most creative costume'], ['bestGroup', 'Best group costume']];
+
+// Judge
+function renderJudge() {
+  const J = judgesN();
+  const me = ls('judge', 0);
+  let h = `<div class="pick"><span><b>Judge</b></span>${Array.from({ length: J }, (_, i) => `<button class="${me === i + 1 ? 'on' : ''}" data-act="judge" data-n="${i + 1}">${i + 1}</button>`).join('')}</div>`;
+  if (!me) { $('#judge').innerHTML = h + '<p>Tap your judge number.</p>'; return; }
+  const live = liveHeat();
+  if (!live) {
+    const nx = S.heats.filter(x => x.status === 'upcoming').sort(byOrder)[0];
+    h += '<div class="card"><h2>Waiting for the next heat</h2>' + (nx ? `<p class="sub">Up next: ${esc(fullLabel(nx))}</p>` : '') + '</div>';
+    $('#judge').innerHTML = h; return;
+  }
+  const l = label(live);
+  const drafts = ls('draft', {});
+  h += `<div class="card live"><h2>${esc(l.title)}</h2><p class="sub">${esc(l.sub)}</p><div class="timer" data-timer="${live.startedAt}"></div></div>`;
+  let all = true, synced = true;
+  live.surfers.forEach(id => {
+    const s = sById(id), k = live.id + '|' + me + '|' + id;
+    const saved = S.scores.find(x => x.id === k);
+    const v = k in drafts ? drafts[k] : (saved ? saved.value : null);
+    if (v == null) all = false;
+    if (!saved || saved.value !== v) synced = false;
+    const src = s && photoSrc(s);
+    h += `<div class="judgecard">${src ? `<img src="${esc(src)}" alt="">` : '<div class="nophoto">🎃</div>'}
+      <div class="lab">${esc(costumeOf(s))}</div><div class="nm">${esc(s ? s.name : '')}</div>
+      <div class="stepper"><button data-act="step" data-k="${esc(k)}" data-d="-0.5" aria-label="Lower score">−</button>
+      <div class="val ${v == null ? 'empty' : ''}">${v == null ? '–' : v.toFixed(1)}</div>
+      <button data-act="step" data-k="${esc(k)}" data-d="0.5" aria-label="Raise score">+</button></div></div>`;
+  });
+  const pend = pendingFor(live.id);
+  h += `<button class="big" data-act="submit" ${all && !synced ? '' : 'disabled'}>${synced ? 'Scores sent' : 'Submit scores'}</button>`;
+  if (pend) h += '<div class="note" style="margin-top:10px">Pending. Scores send automatically when your signal returns. Keep this page open.</div>';
+  else if (synced) h += '<div class="note" style="margin-top:10px">Sent. You can change a score and resubmit until the heat closes.</div>';
+  $('#judge').innerHTML = h;
+}
+
+// Check-in form + roster
+function refreshDivSelect() {
+  const sel = $('#f-div');
+  if (sel.options.length) return;
+  sel.innerHTML = DIVS.map(d => `<option>${esc(d.name)}</option>`).join('') + `<option>${COSTUME}</option>`;
+}
+let divTouched = false;
+function formReset() {
+  ['f-id', 'f-name', 'f-costume', 'f-age'].forEach(i => $('#' + i).value = '');
+  $('#f-photo').value = ''; $('#f-prev').style.display = 'none';
+  $('#f-paid').checked = false; $('#f-cc').checked = false;
+  $('#f-div').selectedIndex = 0; divTouched = false;
+  $('#f-title').textContent = 'Add surfer'; $('#f-save').textContent = 'Add surfer';
+  $('#f-cancel').style.display = 'none'; $('#f-del').style.display = 'none';
+  syncCC();
+}
+function syncCC() { $('#f-ccwrap').style.display = $('#f-div').value === COSTUME ? 'none' : ''; }
+function formEdit(id) {
+  const s = sById(id); if (!s) return;
+  refreshDivSelect();
+  $('#f-id').value = s.id; $('#f-name').value = s.name; $('#f-costume').value = s.costume;
+  $('#f-age').value = s.age; $('#f-div').value = s.division; divTouched = true;
+  $('#f-paid').checked = s.paid; $('#f-cc').checked = s.costumeContest;
+  $('#f-photo').value = ''; const src = photoSrc(s);
+  $('#f-prev').style.display = src ? '' : 'none'; if (src) $('#f-prev').src = src;
+  $('#f-title').textContent = 'Edit entry'; $('#f-save').textContent = 'Save changes';
+  $('#f-cancel').style.display = ''; $('#f-del').style.display = '';
+  syncCC(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function shrink(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const sc = Math.min(1, 480 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      res(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = rej; img.src = u;
+  });
+}
+async function saveSurfer() {
+  const costume = $('#f-costume').value.trim(), name = $('#f-name').value.trim();
+  const division = $('#f-div').value, ageRaw = $('#f-age').value;
+  if (!costume) return alert('Add a costume label. Judges identify surfers by it.');
+  if (!name) return alert('Add a name.');
+  if (division !== COSTUME && ageRaw === '') return alert('Add an age, or pick Costume only.');
+  const editId = $('#f-id').value, id = editId || uid('s');
+  const row = { id, name, age: ageRaw === '' ? '' : Number(ageRaw), division, costume, paid: $('#f-paid').checked, costumeContest: division === COSTUME ? true : $('#f-cc').checked };
+  if (!editId) row.photo = '';
+  const ops = [{ t: 'upsert', tab: 'Surfers', row }];
+  const f = $('#f-photo').files[0];
+  if (f) { const data = await shrink(f); localPhotos[id] = data; ops.push({ t: 'photo', id, data }); }
+  await act(() => call(ops));
+  formReset(); $('#f-costume').focus();
+}
+function renderRoster() {
+  const all = S.surfers;
+  const paid = all.filter(s => s.paid), owed = all.reduce((a, s) => a + feeOf(s), 0), got = paid.reduce((a, s) => a + feeOf(s), 0);
+  let h = `<div class="card"><h2>${all.length} entries</h2><p class="sub">Collected ${money(got)} of ${money(owed)}. Unpaid: ${all.length - paid.length}.</p>`;
+  divList().concat([COSTUME]).forEach(d => {
+    const l = all.filter(s => s.division === d);
+    if (!l.length) return;
+    const dg = l.filter(s => s.paid).reduce((a, s) => a + feeOf(s), 0);
+    h += `<h3 style="margin-top:12px;font-size:18px">${esc(d)} (${l.length}${d !== COSTUME ? ', ' + money(dg) : ''})</h3>` +
+      l.map(s => `<div class="item">${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${esc(s.name)}${s.age !== '' ? ', ' + s.age : ''}${s.costumeContest && d !== COSTUME ? ', costume contest' : ''}</span></div>
+        <button class="sm ${s.paid ? '' : 'alt'}" data-act="paid" data-id="${esc(s.id)}">${s.paid ? 'Paid' : 'Unpaid'}</button>
+        <button class="sm alt" data-act="edit" data-id="${esc(s.id)}">Edit</button></div>`).join('');
+  });
+  if (!all.length) h += '<p class="sub">No entries yet. Add the first one above.</p>';
+  $('#roster').innerHTML = h + '</div>';
+}
+
+// Run of show
+function renderRun() {
+  const J = judgesN();
+  let h = '';
+  divList().forEach(d => {
+    const hs = heatsOf(d).sort(byOrder);
+    const n = S.surfers.filter(s => s.division === d).length;
+    h += `<div class="card"><h2>${esc(d)}</h2><p class="sub">${n} surfers</p>`;
+    if (!hs.length) h += n ? `<button class="big" data-act="gen" data-d="${esc(d)}">Make round 1 heats</button>` : '<p class="sub">No entries yet.</p>';
+    else {
+      const upcoming = hs.filter(x => x.status === 'upcoming');
+      const inR1 = new Set(hs.filter(x => x.round === 1).flatMap(x => x.surfers));
+      const un = S.surfers.filter(s => s.division === d && !inR1.has(s.id));
+      if (un.length) {
+        h += '<div class="note"><b>Not in a heat yet</b>' + un.map(s => `<div class="item">${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b></div>
+          ${upcoming.length ? `<select data-chg="assign" data-s="${esc(s.id)}"><option value="">Add to...</option>${upcoming.map(u => `<option value="${esc(u.id)}">${esc(label(u).sub)}</option>`).join('')}</select>` : '<span>No upcoming heat</span>'}</div>`).join('') + '</div>';
+      }
+      hs.forEach(x => { h += heatCard(x, upcoming, J); });
+      const last = Math.max(...hs.map(x => x.round)), lh = hs.filter(x => x.round === last);
+      if (lh.every(x => x.status === 'closed') && !lh.some(x => x.final))
+        h += `<button class="big" data-act="gen" data-d="${esc(d)}">Make round ${last + 1} heats</button>`;
+    }
+    h += '</div>';
+  });
+
+  // Costume contest winners
+  const entrants = S.surfers.filter(s => s.costumeContest || s.division === COSTUME);
+  h += '<div class="card"><h2>Costume contest winners</h2>' + costumeCats().map(c => `<div class="row" style="margin-bottom:8px"><span class="grow"><b>${c[1]}</b></span>
+    <select data-chg="winner" data-k="${c[0]}" style="max-width:60%"><option value="">Not chosen</option>${entrants.map(s => `<option value="${esc(s.id)}" ${String(S.config[c[0]] || '') === s.id ? 'selected' : ''}>${esc(costumeOf(s))}</option>`).join('')}</select></div>`).join('') + '</div>';
+
+  // Settings
+  h += `<div class="card"><h2>Settings</h2>
+    <div class="row" style="margin-bottom:10px"><span class="grow"><b>Number of judges</b></span>
+    <select data-chg="judges">${[1, 2, 3, 4, 5].map(n => `<option ${n === J ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <p class="sub"><b>Merge divisions</b> (use when one has fewer than 3 entries)</p>
+    <div class="row"><select id="m-from" class="grow">${divList().map(d => `<option>${esc(d)}</option>`).join('')}</select>
+    <span>into</span><select id="m-to" class="grow">${divList().map(d => `<option>${esc(d)}</option>`).join('')}</select>
+    <button class="alt" data-act="merge">Merge</button></div></div>`;
+  $('#run').innerHTML = h;
+}
+
+function heatCard(x, upcoming, J) {
+  const l = label(x);
+  const badge = x.status === 'live' ? '<span class="badge bad">Live</span>' : x.status === 'closed' ? '<span class="badge ok">Closed</span>' : '<span class="badge">Upcoming</span>';
+  let h = `<div style="border-top:3px solid #000;padding-top:10px;margin-top:10px"><div class="row"><b class="grow">${esc(l.sub)}</b>${badge}</div>`;
+  if (x.status === 'live') {
+    h += `<div class="timer" data-timer="${x.startedAt}"></div><p class="sub">Judges in: ${Array.from({ length: J }, (_, i) => `Judge ${i + 1} ${judgeDone(x, i + 1) ? '✅' : '⏳'}`).join(', ')}</p>`;
+  }
+  if (x.status === 'closed') {
+    const r = ranking(x);
+    h += r.map((y, i) => { const s = sById(y.id); return `<div class="item"><div class="rank">${i + 1}</div>${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${y.avg != null ? 'Avg ' + y.avg : 'No scores'}${!x.final && i < adv(x) ? ', advances' : ''}</span></div>
+      <button class="sm alt" data-act="mv" data-h="${esc(x.id)}" data-i="${i}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
+      <button class="sm alt" data-act="mv" data-h="${esc(x.id)}" data-i="${i}" data-dir="1" ${i === r.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button></div>`; }).join('');
+    if (r.ties) h += '<div class="note err"><b>Tie.</b> Use the arrows to set the order, or reopen the heat for a re-surf.</div>';
+  } else {
+    const others = upcoming.filter(u => u.id !== x.id && u.division === x.division);
+    h += x.surfers.map(id => { const s = sById(id); return `<div class="item">${thumb(s)}<div class="grow"><b>${esc(costumeOf(s))}</b><span>${esc(s ? s.name : '')}</span></div>
+      ${x.status === 'upcoming' ? `<select data-chg="move" data-s="${esc(id)}" data-from="${esc(x.id)}"><option value="">Move...</option>${others.map(u => `<option value="${esc(u.id)}">${esc(label(u).sub)}</option>`).join('')}<option value="-">Remove from heat</option></select>` : ''}</div>`; }).join('');
+  }
+  h += '<div class="row" style="margin-top:8px">';
+  if (x.status === 'upcoming') h += `<button class="grow" data-act="start" data-h="${esc(x.id)}">Start heat</button><button class="alt" data-act="delheat" data-h="${esc(x.id)}">Delete</button>`;
+  if (x.status === 'live') h += `<button class="grow danger" data-act="close" data-h="${esc(x.id)}">Close heat</button>`;
+  if (x.status === 'closed') h += `<button class="alt sm" data-act="reopen" data-h="${esc(x.id)}">Reopen heat</button>`;
+  return h + '</div></div>';
+}
+
+// ---------- Actions ----------
+async function genRound(d) {
+  const hs = heatsOf(d);
+  const last = hs.length ? Math.max(...hs.map(x => x.round)) : 0;
+  let pool;
+  if (!last) pool = S.surfers.filter(s => s.division === d).map(s => s.id);
+  else {
+    const lh = hs.filter(x => x.round === last);
+    if (lh.some(x => ranking(x).ties) && !confirm('There is an unresolved tie in the last round. Make the next round anyway?')) return;
+    pool = lh.flatMap(x => ranking(x).slice(0, adv(x)).map(r => r.id));
+  }
+  if (pool.length < 3 && !confirm(d + ' has only ' + pool.length + ' surfers, so it cannot award a full podium. Continue? (You can merge divisions in Settings.)')) return;
+  shuffle(pool);
+  const final = pool.length <= 4, k = final ? 1 : Math.ceil(pool.length / 4);
+  const groups = Array.from({ length: k }, () => []);
+  pool.forEach((id, i) => groups[i % k].push(id));
+  const ops = groups.map((g, i) => ({ t: 'upsert', tab: 'Heats', row: { id: uid('h'), division: d, round: last + 1, num: i + 1, final, surfers: g.join(','), status: 'upcoming', startedAt: '', override: '' } }));
+  await act(() => call(ops));
+}
+const heatById = id => S.heats.find(x => x.id === id);
+const setHeat = (id, fields) => ({ t: 'upsert', tab: 'Heats', row: Object.assign({ id }, fields) });
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const a = b.dataset.act, d = b.dataset;
+  if (a === 'tab') { adminTab = d.tab; lsSet('adminTab', adminTab); render(); }
+  else if (a === 'save') act(saveSurfer);
+  else if (a === 'cancel') formReset();
+  else if (a === 'edit') formEdit(d.id);
+  else if (a === 'delsurfer') { const id = $('#f-id').value; if (id && confirm('Delete this entry?')) act(async () => { await call([{ t: 'delete', tab: 'Surfers', id }]); formReset(); }); }
+  else if (a === 'paid') { const s = sById(d.id); act(() => call([{ t: 'upsert', tab: 'Surfers', row: { id: d.id, paid: !s.paid } }])); }
+  else if (a === 'gen') genRound(d.d);
+  else if (a === 'start') {
+    if (liveHeat() && !confirm('Another heat is still live. Start this one anyway?')) return;
+    act(() => call([setHeat(d.h, { status: 'live', startedAt: Date.now() })]));
+  }
+  else if (a === 'close') { if (confirm('Close this heat? Judges can no longer change scores.')) act(() => call([setHeat(d.h, { status: 'closed' })])); }
+  else if (a === 'reopen') act(() => call([setHeat(d.h, { status: 'live', override: '' })]));
+  else if (a === 'delheat') { if (confirm('Delete this heat? Its surfers go back to unassigned.')) act(() => call([{ t: 'delete', tab: 'Heats', id: d.h }])); }
+  else if (a === 'mv') {
+    const hh = heatById(d.h), order = ranking(hh).map(r => r.id), i = Number(d.i), j = i + Number(d.dir);
+    [order[i], order[j]] = [order[j], order[i]];
+    act(() => call([setHeat(d.h, { override: order.join(',') })]));
+  }
+  else if (a === 'merge') {
+    const from = $('#m-from').value, to = $('#m-to').value;
+    if (from === to) return;
+    if (heatsOf(from).length || heatsOf(to).length) return alert('Delete the existing heats for both divisions first, then merge.');
+    if (confirm('Move everyone in ' + from + ' into ' + to + '?'))
+      act(() => call(S.surfers.filter(s => s.division === from).map(s => ({ t: 'upsert', tab: 'Surfers', row: { id: s.id, division: to } }))));
+  }
+  else if (a === 'judge') { lsSet('judge', Number(d.n)); renderJudge(); }
+  else if (a === 'step') {
+    const dr = ls('draft', {}), cur = dr[d.k];
+    dr[d.k] = cur == null ? 5 : Math.max(0, Math.min(10, cur + Number(d.d)));
+    lsSet('draft', dr); renderJudge();
+  }
+  else if (a === 'submit') {
+    const live = liveHeat(), me = ls('judge', 0), dr = ls('draft', {});
+    if (!live || !me) return;
+    const ops = live.surfers.map(id => { const k = live.id + '|' + me + '|' + id; return { t: 'upsert', tab: 'Scores', row: { id: k, heatId: live.id, judge: me, surferId: id, value: dr[k] } }; });
+    enqueue(ops); renderJudge();
+  }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'f-age' ) { /* handled on input */ }
+  if (el.id === 'f-div') { divTouched = true; syncCC(); }
+  if (el.id === 'f-photo') {
+    const f = el.files[0];
+    if (f) { $('#f-prev').src = URL.createObjectURL(f); $('#f-prev').style.display = ''; }
+  }
+  const c = el.dataset && el.dataset.chg; if (!c) return;
+  if (c === 'judges') act(() => call([{ t: 'upsert', tab: 'Config', row: { id: 'judges', value: Number(el.value) } }]));
+  else if (c === 'winner') act(() => call([{ t: 'upsert', tab: 'Config', row: { id: el.dataset.k, value: el.value } }]));
+  else if (c === 'move' || c === 'assign') {
+    if (!el.value) return;
+    const sid = el.dataset.s, ops = [];
+    if (c === 'move') { const from = heatById(el.dataset.from); ops.push(setHeat(from.id, { surfers: from.surfers.filter(x => x !== sid).join(','), override: '' })); }
+    if (el.value !== '-') { const to = heatById(el.value); ops.push(setHeat(to.id, { surfers: to.surfers.concat(sid).join(','), override: '' })); }
+    act(() => call(ops));
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'f-age' && !divTouched) {
+    const a = e.target.value;
+    if (a !== '') { $('#f-div').value = suggestDiv(Number(a)); syncCC(); }
+  }
+});
+
+// ---------- Boot ----------
+async function ensurePin() {
+  if (!API_URL) return true;
+  if (!ls('pin', '')) { const p = prompt('Admin PIN'); if (!p) return false; lsSet('pin', p); }
+  try { await call([{ t: 'ping' }]); return true; }
+  catch (e) {
+    if (/PIN/.test(e.message)) { localStorage.removeItem('sc_pin'); alert('Wrong PIN.'); }
+    else alert('Could not reach the server. Check your signal.');
+    return false;
+  }
+}
+async function route() {
+  if (view() === 'admin' && !(await ensurePin())) { location.hash = '#board'; return; }
+  render();
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('online', () => { flush(); poll(); });
+if (!API_URL) $('#demo').style.display = '';
+refreshDivSelect(); formReset();
+route(); poll(); flush();
+setInterval(poll, 4000);
+setInterval(flush, 6000);
+setInterval(tickTimers, 500);
+</script>
+</body>
+</html>
