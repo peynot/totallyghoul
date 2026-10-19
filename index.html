@@ -13,20 +13,20 @@
 <style>
 :root{
   --yellow:#FFCF00; --blue:#1266E8; --sky:#A1DBFF; --red:#FF1403; --green:#00614D; --coral:#F77D57; --pink:#FFC4D6;
-  --paper:#fff; --ink:#000; --line:#000;
+  --paper:#fff; --ink:#000; --line:#000; --bg:#FFF6CC;
   --serif:'Source Serif 4','Source Serif Pro',Georgia,serif; --sans:Karla,system-ui,sans-serif; --pop:Poppins,Karla,system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--yellow);color:var(--ink);font:500 18px/1.35 var(--sans);-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior-y:none}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 18px/1.35 var(--sans);-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior-y:none}
 body.noscroll{overflow:hidden}
 button{user-select:none;-webkit-user-select:none}
 h1,h2{font-family:var(--serif);font-weight:400;margin:0}
-h3{font:700 14px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin:0}
-header{background:var(--paper);border-bottom:3px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+h3{font:700 15px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin:0}
+header{background:var(--paper);border-bottom:3px solid var(--line);box-shadow:0 8px 0 var(--yellow);padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 header .logo{height:84px;width:auto;display:block}
 header h1{font-size:28px;line-height:1.1;flex:1;min-width:150px}
-#status{font-size:14px;font-weight:700;width:100%}
+#status{font-size:15px;font-weight:700;width:100%}
 #status b{background:var(--red);color:#fff;padding:1px 6px;border-radius:4px}
 body:not([data-view=board]) header{position:sticky;top:0;z-index:20;height:52px;padding:0 14px;flex-wrap:nowrap;gap:10px}
 body:not([data-view=board]) header .logo{display:none}
@@ -39,15 +39,15 @@ body[data-view=judge] main{padding-bottom:120px}
 .card{border:3px solid var(--line);border-radius:8px;padding:12px;margin:0 0 14px;background:var(--paper)}
 .card.live{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue)}
 .card h2{font-size:26px;margin-bottom:6px}
-.sub{font-size:16px;color:#222;margin:0 0 8px}
+.sub{font-size:17px;color:#1a1a1a;margin:0 0 8px}
 .muted{color:#333}
-button,select,input[type=text],input[type=number]{font:inherit;font-weight:700;border:3px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);min-height:52px;padding:8px 12px}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:18px;font-weight:700;border:3px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);min-height:52px;padding:8px 12px}
 button{background:var(--blue);color:#fff;cursor:pointer}
 button.alt{background:var(--paper);color:var(--ink)}
 button.danger{background:var(--red);color:#fff}
 button:disabled{background:#e3e3e3;color:#666;border-color:#777;cursor:not-allowed}
-button.big{width:100%;min-height:64px;font-size:20px}
-button.sm{min-height:40px;padding:4px 10px;font-size:15px}
+button.big{width:100%;min-height:64px;font-size:21px}
+button.sm{min-height:44px;padding:4px 12px;font-size:17px}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid var(--ink);outline-offset:2px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .grow{flex:1;min-width:0}
@@ -55,12 +55,12 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid 
 .sc{border:3px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
 .sc .t{padding:10px}
 .sc .t b{display:block;font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.15}
-.sc .t span{font-size:15px;color:#222}
+.sc .t span{font-size:16px;color:#1a1a1a}
 .timer{font:600 56px/1 var(--serif);margin:4px 0 10px;font-variant-numeric:tabular-nums}
 .timer.over{color:var(--red)}
 .judgecard{border:3px solid var(--line);border-radius:8px;margin:0 0 12px;overflow:hidden;background:var(--paper)}
 .judgecard .lab{font:600 34px/1.1 var(--serif);padding:14px 12px 4px}
-.judgecard .nm{padding:0 12px 12px;font-size:16px;color:#222}
+.judgecard .nm{padding:0 12px 12px;font-size:18px;color:#1a1a1a}
 .stepper{display:flex;align-items:stretch;border-top:3px solid var(--line)}
 .stepper button{width:84px;min-height:76px;font-size:38px;border:0;border-radius:0;line-height:1}
 .stepper .val{flex:1;display:flex;align-items:center;justify-content:center;font:600 48px var(--serif);border-left:3px solid var(--line);border-right:3px solid var(--line)}
@@ -68,47 +68,47 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid 
 .pick{display:flex;gap:8px;align-items:center;margin-bottom:12px}
 .pick button{flex:1;min-height:60px;font-size:24px;background:var(--paper);color:var(--ink)}
 .pick button.on{background:var(--blue);color:#fff}
-.badge{display:inline-block;border:2px solid var(--line);border-radius:20px;padding:2px 10px;font:600 11px/1.3 var(--pop);letter-spacing:.08em;text-transform:uppercase;background:var(--paper)}
+.badge{display:inline-block;border:2px solid var(--line);border-radius:20px;padding:3px 12px;font:600 14px/1.3 var(--pop);letter-spacing:.08em;text-transform:uppercase;background:var(--paper)}
 .badge.ok{background:var(--green);color:#fff;border-color:var(--green)}
 .badge.warn{background:var(--yellow)}
 .badge.bad{background:var(--red);color:#fff;border-color:var(--red)}
 .item{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:2px solid #ddd}
 .item:first-child{border-top:0}
 .item .grow b{display:block;line-height:1.15}
-.item .grow span{font-size:14px;color:#222}
+.item .grow span{font-size:16px;color:#1a1a1a}
 .podium .item{border-top:0}
 .rank{font:600 24px var(--serif);width:34px;text-align:center}
-.note{background:var(--sky);border:2px solid var(--blue);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:15px}
+.note{background:var(--sky);border:2px solid var(--blue);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:16px}
 .err{background:var(--pink);border-color:var(--red)}
-label.chk{display:flex;align-items:center;gap:10px;min-height:52px;font-weight:700}
+label.chk{display:flex;align-items:center;gap:10px;min-height:52px;font-size:18px;font-weight:700}
 label.chk input{width:30px;height:30px;flex:none}
 .form #f-age{flex:0 0 96px;width:96px}
 .form #f-div{padding-left:8px;padding-right:4px}
 .form .row{margin-bottom:10px}
 .form input[type=text],.form input[type=number],.form select{width:100%}
 a{color:var(--ink);font-weight:700;text-decoration:underline}
-footer{text-align:center;padding:10px 0 30px;font-size:16px}
+footer{text-align:center;padding:10px 0 30px;font-size:17px}
 @media (prefers-reduced-motion:no-preference){.timer.over{animation:blink 1s steps(2) infinite}}
 @keyframes blink{50%{opacity:.35}}
 
 .heatbar{position:sticky;top:52px;z-index:15;background:var(--blue);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 14px;margin:0 -12px 12px;border-top:3px solid var(--line);border-bottom:3px solid var(--line)}
 .heatbar b{display:block;font:600 20px/1.1 var(--serif)}
-.heatbar span{font-size:14px}
+.heatbar span{font-size:16px}
 .heatbar .timer{font-size:34px;margin:0;color:#fff}
 .heatbar .timer.over{color:var(--yellow)}
 .judgecard.done{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
 .judgebar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:3px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));align-items:center;gap:12px}
 .judgebar .info{flex:1;min-width:0;line-height:1.2}
-.judgebar .info b{display:block;font-size:18px}
-.judgebar .info span{font-size:13px;color:#222}
-.judgebar button{min-width:140px;min-height:56px;font-size:19px}
+.judgebar .info b{display:block;font-size:19px}
+.judgebar .info span{font-size:15px;color:#1a1a1a}
+.judgebar button{min-width:140px;min-height:56px;font-size:20px}
 .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:3px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 body[data-view=admin] .tabbar{display:flex}
-.tabbar>*{flex:1;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:0;background:var(--paper);color:var(--ink);font:700 13px var(--sans);text-decoration:none;padding:4px}
+.tabbar>*{flex:1;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:0;background:var(--paper);color:var(--ink);font:700 16px var(--sans);text-decoration:none;padding:4px}
 .tabbar>*+*{border-left:2px solid var(--line)}
 .tabbar .on{background:var(--yellow)}
 .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.fab{display:none;position:fixed;right:14px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:25;min-height:60px;border-radius:30px;padding:0 22px;font-size:19px;box-shadow:0 4px 0 var(--line)}
+.fab{display:none;position:fixed;right:14px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:25;min-height:60px;border-radius:30px;padding:0 22px;font-size:20px;box-shadow:0 4px 0 var(--line)}
 body[data-view=admin][data-tab=checkin] .fab{display:flex;align-items:center;gap:8px}
 .sheet{position:fixed;inset:0;z-index:50;display:none}
 .sheet.open{display:block}
@@ -177,7 +177,7 @@ body[data-view=admin][data-tab=checkin] .fab{display:flex;align-items:center;gap
 <script>
 // ---------- Config ----------
 // Paste your Apps Script web app URL here. Leave empty to try the app in demo mode.
-const API_URL = 'https://script.google.com/macros/s/AKfycbxpJ-DdcGn7OyaQ_GObjoWAteYO1hpC8Rtok_9NTLOwSKPeM3K0Gh0-9hN31WRcUKzY/exec';
+const API_URL = '';
 
 const HEAT_MS = 15 * 60 * 1000;
 const COSTUME = 'Costume only';
