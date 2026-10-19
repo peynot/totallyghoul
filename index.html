@@ -28,6 +28,8 @@ header .logo{height:84px;width:auto;display:block}
 header h1{font-size:28px;line-height:1.1;flex:1;min-width:150px}
 #status{font-size:15px;font-weight:700;width:100%}
 #status b{background:var(--red);color:#fff;padding:1px 6px;border-radius:4px}
+#status b.saving{background:var(--yellow);color:var(--ink);border:2px solid var(--line);padding:1px 8px}
+body.busy main{opacity:.55;transition:opacity .15s}
 body:not([data-view=board]) header{position:sticky;top:0;z-index:20;height:52px;padding:0 14px;flex-wrap:nowrap;gap:10px}
 body:not([data-view=board]) header .logo{display:none}
 body:not([data-view=board]) header h1{font-size:20px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -56,8 +58,6 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid 
 .sc .t{padding:10px}
 .sc .t b{display:block;font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.15}
 .sc .t span{font-size:16px;color:#1a1a1a}
-.timer{font:600 56px/1 var(--serif);margin:4px 0 10px;font-variant-numeric:tabular-nums}
-.timer.over{color:var(--red)}
 .judgecard{border:3px solid var(--line);border-radius:8px;margin:0 0 12px;overflow:hidden;background:var(--paper)}
 .judgecard .lab{font:600 34px/1.1 var(--serif);padding:14px 12px 4px}
 .judgecard .nm{padding:0 12px 12px;font-size:18px;color:#1a1a1a}
@@ -88,14 +88,10 @@ label.chk input{width:30px;height:30px;flex:none}
 .form input[type=text],.form input[type=number],.form select{width:100%}
 a{color:var(--ink);font-weight:700;text-decoration:underline}
 footer{text-align:center;padding:10px 0 30px;font-size:17px}
-@media (prefers-reduced-motion:no-preference){.timer.over{animation:blink 1s steps(2) infinite}}
-@keyframes blink{50%{opacity:.35}}
 
 .heatbar{position:sticky;top:52px;z-index:15;background:var(--blue);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 14px;margin:0 -12px 12px;border-top:3px solid var(--line);border-bottom:3px solid var(--line)}
 .heatbar b{display:block;font:600 20px/1.1 var(--serif)}
 .heatbar span{font-size:16px}
-.heatbar .timer{font-size:34px;margin:0;color:#fff}
-.heatbar .timer.over{color:var(--yellow)}
 .judgecard.done{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
 .judgebar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:3px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));align-items:center;gap:12px}
 .judgebar .info{flex:1;min-width:0;line-height:1.2}
@@ -179,7 +175,6 @@ body[data-view=admin][data-tab=checkin] .fab{display:flex;align-items:center;gap
 // Paste your Apps Script web app URL here. Leave empty to try the app in demo mode.
 const API_URL = 'https://script.google.com/macros/s/AKfycbxpJ-DdcGn7OyaQ_GObjoWAteYO1hpC8Rtok_9NTLOwSKPeM3K0Gh0-9hN31WRcUKzY/exec';
 
-const HEAT_MS = 15 * 60 * 1000;
 const COSTUME = 'Costume only';
 const DIVS = [
   { name: 'Tiny Terrors', fee: 20 },
@@ -256,22 +251,30 @@ function demoApply(ops) {
   return db;
 }
 
+// writeSeq changes at the start and end of every write, so a poll that began before a write
+// finished is discarded instead of overwriting fresher data with a stale snapshot.
+let writeSeq = 0;
 async function call(ops) {
-  let res;
-  if (!API_URL) res = demoApply(ops);
-  else {
-    const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ pin: ls('pin', ''), ops }) });
-    res = await r.json();
-  }
-  if (res.error) throw new Error(res.error);
-  setState(res);
-  setOnline(true);
-  return res;
+  writeSeq++;
+  try {
+    let res;
+    if (!API_URL) res = demoApply(ops);
+    else {
+      const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ pin: ls('pin', ''), ops }) });
+      res = await r.json();
+    }
+    if (res.error) throw new Error(res.error);
+    setState(res);
+    setOnline(true);
+    return res;
+  } finally { writeSeq++; }
 }
 async function poll() {
+  const seq = writeSeq;
   try {
     const r = API_URL ? await (await fetch(API_URL)).json() : demoRead();
     if (r.error) throw new Error(r.error);
+    if (seq !== writeSeq || busy) return;
     setState(r); setOnline(true);
   } catch (e) { setOnline(false, e.message); }
 }
@@ -291,7 +294,13 @@ function openSheet(focus) {
 function closeSheet() { $('#sheet').classList.remove('open'); document.body.classList.remove('noscroll'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { formReset(); closeSheet(); } });
 
+// One admin write at a time. Apps Script can take a few seconds, and a second tap
+// during that wait used to create duplicate heats.
+let busy = 0;
+function setBusy(delta) { busy += delta; document.body.classList.toggle('busy', busy > 0); renderStatus(); }
 async function act(fn, msg) {
+  if (busy) { toast('Still saving. Wait a second.'); return false; }
+  setBusy(1);
   try {
     await fn();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -302,7 +311,7 @@ async function act(fn, msg) {
     if (/PIN/.test(e.message)) { localStorage.removeItem('sc_pin'); alert('Wrong PIN. Reload and try again.'); }
     else alert('Not saved. Check your signal and try again.\n(' + e.message + ')');
     return false;
-  }
+  } finally { setBusy(-1); }
 }
 
 // Judge scores go through an offline queue so a dead zone doesn't lose them.
@@ -365,14 +374,8 @@ function surferCard(s) {
 }
 function renderStatus() {
   const n = queue.reduce((a, b) => a + b.length, 0);
+  if (busy) { $('#status').innerHTML = '<b class="saving">Saving...</b>'; return; }
   $('#status').innerHTML = (online === null ? 'Connecting...' : online ? 'Connected' : '<b>Offline</b>' + (lastErr ? ' (' + esc(lastErr) + ')' : '')) + (n ? ` - <b>${n} pending</b>` : '');
-}
-function tickTimers() {
-  document.querySelectorAll('[data-timer]').forEach(el => {
-    const rem = HEAT_MS - (Date.now() - Number(el.dataset.timer));
-    if (rem <= 0) { el.textContent = "Time's up"; el.classList.add('over'); }
-    else { const t = Math.ceil(rem / 1000); el.textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); el.classList.remove('over'); }
-  });
 }
 
 // ---------- Views ----------
@@ -394,7 +397,7 @@ function render() {
     refreshDivSelect();
     renderRoster(); renderRun();
   }
-  renderStatus(); tickTimers();
+  renderStatus();
 }
 
 // Public board
@@ -404,7 +407,6 @@ function renderBoard() {
   if (live) {
     const l = label(live);
     h += `<div class="card live"><h2>${esc(l.title)}</h2><p class="sub">${esc(l.sub)}, in the water now</p>
-      <div class="timer" data-timer="${live.startedAt}"></div>
       <div class="grid">${live.surfers.map(id => surferCard(sById(id))).join('')}</div></div>`;
   } else h += '<div class="card"><h2>No heat in the water</h2><p class="sub">Next heat starts soon.</p></div>';
 
@@ -459,12 +461,12 @@ function renderJudge() {
   const live = liveHeat();
   if (!live) {
     const nx = S.heats.filter(x => x.status === 'upcoming').sort(byOrder)[0];
-    h += '<div class="card"><h2>Waiting for the next heat</h2>' + (nx ? `<p class="sub">Up next: ${esc(fullLabel(nx))}</p>` : '') + '</div>';
+    h += '<div class="card"><h2>Waiting for the next heat</h2><p class="sub">Scoring opens when the heat is started.</p>' + (nx ? `<p class="sub"><b>Up next:</b> ${esc(fullLabel(nx))}</p>` : '') + '</div>';
     $('#judge').innerHTML = h; return;
   }
   const l = label(live);
   const drafts = ls('draft', {});
-  h += `<div class="heatbar"><div><b>${esc(l.title)}</b><span>${esc(l.sub)}</span></div><div class="timer" data-timer="${live.startedAt}"></div></div>`;
+  h += `<div class="heatbar"><div><b>${esc(l.title)}</b><span>${esc(l.sub)}</span></div><div class="badge bad">Live</div></div>`;
   let scored = 0, synced = true;
   live.surfers.forEach(id => {
     const s = sById(id), k = live.id + '|' + me + '|' + id;
@@ -590,7 +592,7 @@ function heatCard(x, upcoming, J) {
   const badge = x.status === 'live' ? '<span class="badge bad">Live</span>' : x.status === 'closed' ? '<span class="badge ok">Closed</span>' : '<span class="badge">Upcoming</span>';
   let h = `<div style="border-top:3px solid #000;padding-top:10px;margin-top:10px"><div class="row"><b class="grow">${esc(l.sub)}</b>${badge}</div>`;
   if (x.status === 'live') {
-    h += `<div class="timer" data-timer="${x.startedAt}"></div><p class="sub">Judges in: ${Array.from({ length: J }, (_, i) => `Judge ${i + 1} ${judgeDone(x, i + 1) ? '✅' : '⏳'}`).join(', ')}</p>`;
+    h += `<p class="sub">Judges in: ${Array.from({ length: J }, (_, i) => `Judge ${i + 1} ${judgeDone(x, i + 1) ? '✅' : '⏳'}`).join(', ')}</p>`;
   }
   if (x.status === 'closed') {
     const r = ranking(x);
@@ -636,7 +638,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
   const a = b.dataset.act, d = b.dataset;
   if (a === 'tab') { adminTab = d.tab; lsSet('adminTab', adminTab); render(); }
-  else if (a === 'save') act(saveSurfer);
+  else if (a === 'save') saveSurfer();
   else if (a === 'cancel') { formReset(); closeSheet(); }
   else if (a === 'add') { formReset(); openSheet(true); }
   else if (a === 'edit') formEdit(d.id);
@@ -721,7 +723,6 @@ refreshDivSelect(); formReset();
 route(); poll(); flush();
 setInterval(poll, 4000);
 setInterval(flush, 6000);
-setInterval(tickTimers, 500);
 </script>
 </body>
 </html>
